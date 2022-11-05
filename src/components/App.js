@@ -1,7 +1,7 @@
 import React from "react";
 import { useState, useEffect } from "react";
 import AppRouter from "components/Router";
-
+import GlobalStyle from "style/GlobalStyle";
 import { authService } from "fbase";
 
 function App() {
@@ -36,6 +36,8 @@ function App() {
   };
   return (
     <>
+      <GlobalStyle />
+
       {init ? (
         <AppRouter
           isLoggedIn={Boolean(userObj)}

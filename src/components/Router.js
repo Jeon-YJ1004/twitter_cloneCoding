@@ -2,8 +2,9 @@ import React, { useState } from "react";
 import { HashRouter as Router, Route, Switch } from "react-router-dom";
 import Auth from "routes/Auth";
 import Home from "routes/Home";
-import Navigation from "./Navigation";
 import Profile from "routes/Profile";
+import Explore from "./../routes/Explore";
+import Bookmark from "./../routes/Bookmark";
 
 const AppRouter = ({ refreshUser, isLoggedIn, userObj }) => {
   return (
@@ -11,12 +12,17 @@ const AppRouter = ({ refreshUser, isLoggedIn, userObj }) => {
       <Switch>
         {isLoggedIn ? (
           <>
-            {isLoggedIn && <Navigation userObj={userObj} />}
             <Route exact path="/">
               <Home userObj={userObj} />
             </Route>
             <Route exact path="/profile">
               <Profile userObj={userObj} refreshUser={refreshUser} />
+            </Route>
+            <Route exact path="/bookmark">
+              <Bookmark userObj={userObj} />
+            </Route>
+            <Route exact path="/explore/:type">
+              <Explore userObj={userObj} />
             </Route>
           </>
         ) : (
