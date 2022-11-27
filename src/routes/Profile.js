@@ -2,14 +2,17 @@ import React, { useEffect, useState } from "react";
 import { authService, dbService } from "fbase";
 import { useHistory } from "react-router-dom";
 import { ref } from "firebase/storage";
+import styled from "styled-components";
 
 function Profile({ refreshUser, userObj }) {
   const history = useHistory();
+  const createdTime = userObj.cre;
   const [newDisplayName, setNewDisplayName] = useState(userObj.displayName);
+  const [toggleUpdate, setToggleUpdate] = useState(false);
+  const [userInfo, setUserInfo] = useState([]);
 
-  const onLogOutClick = () => {
-    authService.signOut();
-    history.push("/");
+  const getUserInfo = async () => {
+    const data = await dbService.collection("users").doc(userObj.uid);
   };
   const getMyTweets = async () => {
     const tweets = await dbService
@@ -25,6 +28,7 @@ function Profile({ refreshUser, userObj }) {
     } = event;
     setNewDisplayName(value);
   };
+
   const onSubmit = async (event) => {
     event.preventDefault();
     if (userObj.displayName !== newDisplayName) {
@@ -32,12 +36,16 @@ function Profile({ refreshUser, userObj }) {
       refreshUser();
     }
   };
+  const onUpdateClick = () => {};
   useEffect(() => {
     getMyTweets();
   }, []);
   return (
-    <>
-      <form onSubmit={onSubmit}>
+    <div>
+      <div>{newDisplayName}</div>
+      <div onClick={onUpdateClick}>update Profile</div>
+
+      <ProfileContainer onSubmit={onSubmit}>
         <input
           type="text"
           placeholder="new name"
@@ -45,10 +53,36 @@ function Profile({ refreshUser, userObj }) {
           onChange={onChange}
         />
         <input type="submit" value="Update Profile" />
-      </form>
-      <button onClick={onLogOutClick}>Log out </button>
-    </>
+      </ProfileContainer>
+    </div>
   );
 }
+
+const ProfileContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
+
+const ProfileFormImage = styled.img`
+  border-radius: 50%;
+  width: 120px;
+  height: 120px;
+  border: 5px solid #d0d0d0;
+  cursor: pointer;
+`;
+const ProfileFormSubmit = styled.input`
+  border: none;
+  outline: none;
+  cursor: pointer;
+  padding: 10px 15px;
+  color: white;
+  border-radius: 30px;
+  font-size: 15px;
+  font-weight: bold;
+  background-color: var(--twitter-color);
+  &:hover {
+    background-color: var(--twitter-dark-color);
+  }
+`;
 
 export default Profile;

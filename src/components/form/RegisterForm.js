@@ -1,9 +1,9 @@
-import { React } from "react";
-import { useState } from "react";
-import { authService } from "./../fbase";
-import PropTypes from "prop-types";
+import { React, useState } from "react";
+import { authService } from "../../fbase";
 
-const AuthForm = () => {
+// import PropTypes from "prop-types";
+//이메일로 회원가입.
+const RegisterForm = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [newAccount, setNewAccount] = useState(true);
@@ -56,4 +56,4 @@ const AuthForm = () => {
   );
 };
 
-export default AuthForm;
+export default RegisterForm;

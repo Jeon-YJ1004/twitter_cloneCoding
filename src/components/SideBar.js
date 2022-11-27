@@ -1,19 +1,28 @@
 import React from "react";
+import { authService, dbService } from "fbase";
+import { useHistory } from "react-router-dom";
+
 import styled from "styled-components";
 import PersonIcon from "@mui/icons-material/Person";
 import HomeIcon from "@mui/icons-material/Home";
 import ExploreIcon from "@mui/icons-material/Explore";
 import AccountBoxIcon from "@mui/icons-material/AccountBox";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
+import BookmarkIcon from "@mui/icons-material/Bookmark";
 
 import { Link } from "react-router-dom";
 function SideBar({ userObj }) {
+  const history = useHistory();
+
   const toggleProfile = (e) => {};
   const onLogOutModalClick = () => {};
-
+  const onLogOutClick = () => {
+    authService.signOut();
+    history.push("/");
+  };
   return (
     <>
-      <UserContainer>
+      {/* <UserContainer>
         <UserInfo>
           {userObj.photoURL ? (
             <UserImg src={userObj.photoURL} />
@@ -25,8 +34,9 @@ function SideBar({ userObj }) {
           </UserName>
           <MoreHorizIcon onClick={onLogOutModalClick} />
         </UserInfo>
-      </UserContainer>
-      <MenuContainer>
+      </UserContainer> */}
+
+      <MenuList>
         <Menu to="/">
           <MenuIcon>
             <HomeIcon />
@@ -40,7 +50,9 @@ function SideBar({ userObj }) {
           <MenuText>explore</MenuText>
         </Menu>
         <Menu to="/bookmark">
-          <MenuIcon></MenuIcon>
+          <MenuIcon>
+            <BookmarkIcon />
+          </MenuIcon>
           <MenuText>북마크</MenuText>
         </Menu>
         <Menu to="/profile">
@@ -55,28 +67,40 @@ function SideBar({ userObj }) {
           </MenuIcon>
           <MenuText>더보기</MenuText>
         </Menu>
-      </MenuContainer>
+      </MenuList>
+      <button onClick={onLogOutClick}>Log out </button>
     </>
   );
 }
 
-const MenuContainer = styled.div`
-  width: 280px;
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  position: fixed;
-  padding-right: 20px;
+const MenuList = styled.ul``;
+const Menu = styled(Link)`
+  margin-bottom: 8px;
+  display: inline-block;
+  margin-right: 50px;
+  align-items: center;
+  padding: 12px 15px;
+  padding-right: 25px;
+  border-radius: 50px;
   box-sizing: border-box;
-  padding-top: 5px;
-  padding-bottom: 15px;
-  border-right: 1px solid
-    ${(props) => (props.current === "true" ? "#1e2125" : "#eee")};
+  cursor: pointer;
+  &:link {
+    color: inherit;
+  }
+  &:visited {
+    color: inherit;
+  }
 `;
-const Menu = styled(Link)``;
-const MenuIcon = styled.div``;
-const MenuText = styled.div``;
+const MenuIcon = styled.div`
+  width: 30px !important;
+  display: inline-block;
+  font-size: 24px;
+`;
+const MenuText = styled.div`
+  display: inline-block;
+  font-size: 20px;
+  margin-left: 20px;
+`;
 const UserContainer = styled.div``;
 const UserInfo = styled.div`
   flex: 8;

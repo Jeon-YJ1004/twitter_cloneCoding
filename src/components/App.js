@@ -6,34 +6,47 @@ import { authService } from "fbase";
 
 function App() {
   const [init, setInit] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userObj, setUserObj] = useState(null);
-  useEffect(() => {
-    authService.onAuthStateChanged((user) => {
-      if (user) {
-        if (user.auth.displayName === null) {
-          const name = user.email.split("@")[0];
-          user.displayName = name;
-        }
 
-        setUserObj({
-          displayName: user.displayName,
-          uid: user.uid,
-          updateProfile: (args) => user.updateProfile(args),
-        });
-      } else {
-        setUserObj(null);
-      }
-      setInit(true);
-    });
-  }, []);
   const refreshUser = () => {
     const user = authService.currentUser;
     setUserObj({
       displayName: user.displayName,
       uid: user.uid,
-      updateProfile: (args) => user.updateProfile(args),
+      email: user.email,
+      photoURL: user.photoURL,
+      creationTime: user.metadata.a,
+      lastSignInTime: user.metadata.b,
+      updateProfile: (name) => user.updateProfile(name),
     });
   };
+
+  useEffect(() => {
+    authService.onAuthStateChanged((userObj) => {
+      if (userObj) {
+        if (userObj.auth.displayName === null) {
+          const name = userObj.email.split("@")[0];
+          userObj.displayName = name;
+        }
+        setIsLoggedIn(true);
+        setUserObj({
+          displayName: userObj.displayName,
+          uid: userObj.uid,
+          email: userObj.email,
+          photoURL: userObj.photoURL,
+          creationTime: userObj.metadata.a,
+          lastSignInTime: userObj.metadata.b,
+          updateProfile: (name) => userObj.updateProfile(name),
+        });
+      } else {
+        setUserObj(null);
+        setIsLoggedIn(false);
+      }
+      setInit(true);
+    });
+  }, []);
+
   return (
     <>
       <GlobalStyle />
