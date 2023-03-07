@@ -1,25 +1,82 @@
 import React from "react";
 import styled from "styled-components";
-import { authService, firebaseInstance } from "fbase";
-import { doc, setDoc } from "firebase/firestore";
+import { authService, firebaseInstance , dbService} from "fbase";
+import { collection, doc, getDoc, setDoc } from "firebase/firestore";
+import { useDispatch } from "react-redux";
+import { setCurrentUser, setLoginToken } from "reducers/userApi";
 
 // import GoogleIcon from "@mui/icons-material/Google";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import google_logo from "images/google_logo.svg";
 import kakaotalk_logo from "images/kakaotalk_logo.svg";
+import bgimg from "images/backgroundImg.jpg"
+
 function LoginForm({ isLoginForm }) {
+  const dispatch = useDispatch();
   const onSocialLoginClick = async (event) => {
     const {
       target: { name },
     } = event;
     let provider;
+    let user;
     try {
       if (name === "google") {
         provider = new firebaseInstance.auth.GoogleAuthProvider();
+        
       } else if (name === "github") {
         provider = new firebaseInstance.auth.GithubAuthProvider();
       }
-      await authService.signInWithPopup(provider);
+      await authService.signInWithPopup(provider)
+      .then((result)=>{
+          // This is the signed-in user
+          user = result.user;
+          console.log(user)
+
+          const docRef = doc(dbService, "users", user.uid);
+          getDoc(docRef).then(async (snap) => {
+            if (snap.exists()) {
+              await dispatch(setLoginToken("login"));
+              await dispatch(
+                setCurrentUser({
+                  ...snap.data(),
+                  uid: user.uid,
+                  rejweet: user.rejweet ? user.rejweet : [],
+                })
+              );
+              sessionStorage.setItem("loginToken", true);
+            } else {
+              console.log("회원정보 없음");
+              await dispatch(setLoginToken("login"));
+              await dispatch(
+                setCurrentUser({
+                  uid: user.uid,
+                  photoURL: user.photoURL,
+                  email: user.email,
+                  displayName: user.displayName,
+                  description: "",
+                  bookmark: [],
+                  rejweet: [],
+                  bgURL: user.bgURL ? user.bgURL : bgimg,
+                })
+              );
+              const usersRef = await collection(dbService, "users");
+              await setDoc(doc(usersRef, user.uid), {
+                photoURL: user.photoURL,
+                email: user.email,
+                displayName:
+                  user.displayName === ""
+                    ? user.email.split("@")[0]
+                    : user.displayName,
+                bookmark: [],
+                rejweet: [],
+                description: "",
+                bgURL: user.bgURL ? user.bgURL : bgimg,
+              });
+              sessionStorage.setItem("loginToken", true);
+              
+            }
+          });
+      })
     } catch (err) {
       console.log(err);
     }

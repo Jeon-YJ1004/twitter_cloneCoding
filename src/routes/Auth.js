@@ -4,9 +4,9 @@ import styled from "styled-components";
 import RegisterForm from "components/form/RegisterForm";
 import LoginForm from "components/form/LoginForm";
 
-function Auth({}) {
+function Auth() {
   const [isLoginForm, setIsLoginForm] = useState(true);
-
+  const [isLogin, setIsLogin] = useState(true);
   // const onLoginClick = () => {};
   // const onRegisterClick = () => {};
   // const onLogoutClick = () => {};

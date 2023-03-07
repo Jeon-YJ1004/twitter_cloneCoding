@@ -1,26 +1,60 @@
-import React from "react";
-import { useState, useRef } from "react";
+import {React , useState, useRef,useCallback,useEffect } from "react";
 import { dbService, storageService } from "../../fbase";
 import styled from "styled-components";
 import { v4 as uuidv4 } from "uuid";
+import { useDispatch, useSelector } from "react-redux";
+
 import EmojiPicker from "emoji-picker-react";
 import CancelIcon from "@mui/icons-material/Cancel";
 import PhotoIcon from "@mui/icons-material/Photo";
 import MoodIcon from "@mui/icons-material/Mood";
+import PersonIcon from "@mui/icons-material/Person";
 
-function TweetForm({ userObj }) {
+function TweetForm() {
+  const dispatch = useDispatch();
+  const currentUserObj=useSelector(state=>state.user.currentUser)
+  const loginToken=useSelector(state=>state.loginToken);
   const [tweet, setTweet] = useState("");
-  const [attachment, setAttachment] = useState(null);
-  const [fileDataUrl, setFileDataUrl] = useState("");
-  const [fileName, setFileName] = useState("");
-  const [Emoji, setEmoji] = useState(false);
-  const textRef = useRef();
+  const textRef=useRef();
+  const [attachment, setAttachment] = useState("");
   const fileRef = useRef();
+  const [fileName, setFileName] = useState("");
+
+  const [Emoji, setEmoji] = useState(false);
+  const emojiRef = useRef();
+	const [emojiClick, setEmojiClick] = useState(false);
+  const toggleEmoji = () => {
+		if (emojiClick) {
+			setEmojiClick(false);
+		} else {
+			setEmojiClick(true);
+			textRef.current.focus();
+		}
+	};
+  const onEmojiInput = (event, emojiObject) => {
+    const beforeEmojiText = textRef.current.value;
+    const inputValue = beforeEmojiText + emojiObject.emoji;
+    setTweet(inputValue);
+  };
+  useEffect(() => {
+		if (!emojiClick) return;
+		function handleClick(e) {
+			if (emojiRef.current === null) {
+				return;
+			} else if (!emojiRef.current.contains(e.target)) {
+				setEmojiClick(false);
+			}
+		}
+		window.addEventListener("click", handleClick);
+
+		return () => window.removeEventListener("click", handleClick);
+	}, [emojiClick]);
+
 
   // 트윗 submit
   const onSubmit = async (event) => {
     event.preventDefault();
-    if (userObj === null) {
+    if (loginToken==="logout") {
       alert("NotLogin");
       return;
     }
@@ -28,20 +62,18 @@ function TweetForm({ userObj }) {
 
     if (tweet === "" && attachment === "") {
       alert("사진이나 글이 필요합니다");
-    }
-    const randomId = uuidv4();
-    if (attachment !== null) {
+    }else{
+      const randomId = uuidv4();
+      if (attachment !== "") {
       //파일 업로드 시 저장될 ref 경로 생성. 파일을 버킷에 업로드
-      const fileRef = storageService.ref().child(`${userObj.uid}/${randomId}`);
+      const fileRef = storageService.ref().child(`${currentUserObj.uid}/${randomId}`);
       const response = await fileRef.putString(attachment, "data_url");
       attachmentUrl = await response.ref.getDownloadURL();
     }
     const tweetObj = {
       text: tweet,
       createdTime: Date.now(),
-      creatorId: userObj.uid,
-      displayName: userObj.displayName,
-      creatorImg: userObj.photoURL,
+      creatorId: currentUserObj.uid,
       randomId: randomId,
       like: [],
       reply: [],
@@ -52,7 +84,9 @@ function TweetForm({ userObj }) {
     await dbService.collection("tweets").add(tweetObj);
     setTweet("");
     setEmoji(false);
-    setAttachment();
+    setAttachment("");
+    }
+    
   };
 
   const onTextChange = (event) => {
@@ -75,35 +109,31 @@ function TweetForm({ userObj }) {
       } = finishedEvent;
       setAttachment(result);
     };
+    //파일 이름이 같을 수 있기때문에 뒤에 시간을 붙여서 구별
     reader.readAsDataURL(theFile);
     setFileName(`${uploadFileName}_${Date.now()}`);
   };
 
-  const onClearImgClick = () => {
+  const onClearFileClick = () => {
     setAttachment(null);
     fileRef.current.value = null;
   };
-
-  const onEmojiInput = (event, emojiObject) => {
-    const beforeEmojiText = textRef.current.value;
-    const inputValue = beforeEmojiText + emojiObject.emoji;
-    setTweet(inputValue);
-  };
-
-  const onEmojiClick = () => {
-    setEmoji(!Emoji);
-  };
-
+  
   return (
     <>
+    {currentUserObj.photoURL ? (
+      <UserImg src={currentUserObj.photoURL} />
+        ) : (
+          <PersonIcon />
+        )}
       <FormContainer onSubmit={onSubmit}>
         <FormTextInput
           type="text"
           value={tweet}
+          ref={textRef}
           onChange={onTextChange}
           placeholder="what's on your mind"
           maxLength={100}
-          ref={textRef}
           required
         />
         <FormImgInput
@@ -121,7 +151,7 @@ function TweetForm({ userObj }) {
               height="50px"
               alt="tweet"
             />
-            <button onClick={onClearImgClick}>
+            <button onClick={onClearFileClick}>
               <ImgCloseBtn />
             </button>
           </ImgContainer>
@@ -132,21 +162,28 @@ function TweetForm({ userObj }) {
               <PhotoIcon />
             </label>
           </StyledIcon>
-          <StyledIcon>
-            <MoodIcon onClick={onEmojiClick}></MoodIcon>
-          </StyledIcon>
-          {Emoji ? <EmojiPicker onEmojiClick={onEmojiInput} /> : null}
+          {/* <StyledIcon ref={emojiRef}>
+            <MoodIcon onClick={toggleEmoji}/>
+            <EmojiToggleDiv hide={!emojiClick}>
+              <EmojiPicker onEmojiClick={onEmojiInput} />
+            </EmojiToggleDiv>
+           
+          </StyledIcon> */}
           <FormSumbitInput type="submit" value="Tweet" />
         </IconContainer>
       </FormContainer>
     </>
   );
 }
-
+const UserImg = styled.img`
+  width: 47px;
+  height: 47px;
+  border-radius: 50%;
+`;
 const FormContainer = styled.form`
   position: relative;
 `;
-const FormTextInput = styled.input`
+const FormTextInput = styled.textarea`
   width: 100%;
   border: none;
   outline: none;
@@ -198,6 +235,9 @@ const StyledIcon = styled.div`
       props.current === "true" ? "#1e2125" : "#e6f3ff"};
   }
 `;
+const EmojiToggleDiv=styled.div`
+  ${(props)=>props.hide && `display: none;`}
+`
 const FormSumbitInput = styled.input`
   border: none;
   outline: none;

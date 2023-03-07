@@ -1,6 +1,9 @@
-import { React, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { doc, onSnapshot } from "firebase/firestore";
 import styled from "styled-components";
 import { dbService, storageService } from "./../fbase";
+import { useSelector } from "react-redux";
+import { useHistory } from "react-router-dom";
 
 import PersonIcon from "@mui/icons-material/Person";
 import ModeEditIcon from "@mui/icons-material/ModeEdit";
@@ -11,9 +14,13 @@ import RepeatIcon from "@mui/icons-material/Repeat";
 import CheckIcon from "@mui/icons-material/Check";
 import BackspaceIcon from "@mui/icons-material/Backspace";
 
-export default function Nweet({ tweetObj, isOwner, userObj }) {
+export default function Tweet({ tweetObj }) {
+  const history = useHistory();
+  const currentUser = useSelector((state) => state.user.currentUser);
+
   const [isEditing, setIsEditing] = useState(false); //edit 모드 t/f
   const [newTweet, setNewTweet] = useState(tweetObj.text);
+  const [creatorInfo, setCreatorInfo] = useState({});
 
   const onDeleteClick = async () => {
     const ok = window.confirm("트윗을 삭제합니다?");
@@ -49,7 +56,6 @@ export default function Nweet({ tweetObj, isOwner, userObj }) {
     setNewTweet(value);
   };
   const getDatetoString = (d) => {
-    console.log(tweetObj);
     var date = new Date(d);
     let str =
       date.getFullYear() +
@@ -60,41 +66,45 @@ export default function Nweet({ tweetObj, isOwner, userObj }) {
       "일 ";
     return str;
   };
+  useEffect(() => {
+    onSnapshot(doc(dbService, "users", tweetObj.creatorId), (doc) => {
+      setCreatorInfo(doc.data());
+      //setLoading(true);
+    });
+  }, [tweetObj]);
   return (
     <PostedTweetContainer>
       {isEditing ? (
         <>
-          {isOwner && (
-            <>
-              <WriterImg
-                src={
-                  tweetObj.creatorImgs ? tweetObj.creatorImgs : <PersonIcon />
-                }
-              />
-              <WriterInfo>
-                <WriterName>{tweetObj.displayName}</WriterName>
-                <WriterEmail>{tweetObj.email}</WriterEmail>
-                <WriterCreatedAt>
-                  {getDatetoString(tweetObj.createdTime)}
-                </WriterCreatedAt>
-                <CheckIcon type="submit" onClick={onSubmit} />
-                <BackspaceIcon type="button" onClick={onCancelEdit} />
-              </WriterInfo>
+          <WriterImg
+            src={
+              creatorInfo.photoURL ? creatorInfo.photoURL : <PersonIcon />
+            }
+          />
+          <WriterInfo>
+            <WriterName>{creatorInfo.displayName}</WriterName>
+            {/* <WriterEmail>{creatorInfo.email}</WriterEmail> */}
+            <WriterCreatedAt>
+              {getDatetoString(tweetObj.createdTime)}
+            </WriterCreatedAt>
+            <CheckIcon type="submit" onClick={onSubmit} />
+            <BackspaceIcon type="button" onClick={onCancelEdit} />
+          </WriterInfo>
 
-              <EditTextbox
-                type="text"
-                value={newTweet}
-                onChange={onChange}
-                maxlength="150"
-              ></EditTextbox>
-            </>
-          )}
+          <EditTextbox
+            type="text"
+            value={newTweet}
+            onChange={onChange}
+            maxlength="150"
+          ></EditTextbox>
         </>
       ) : (
         <>
           <WriterImg
-            src={tweetObj.creatorImg ? tweetObj.creatorImg : <PersonIcon />}
-          />
+                src={
+                  creatorInfo.photoURL ? creatorInfo.photoURL : <PersonIcon />
+                }
+              />
           <PostedTweet>
             <WriterInfo>
               <WriterName>{tweetObj.displayName}</WriterName>
@@ -103,16 +113,16 @@ export default function Nweet({ tweetObj, isOwner, userObj }) {
                 {getDatetoString(tweetObj.createdTime)}
               </WriterCreatedAt>
             </WriterInfo>
-            {isOwner && (
-              <>
-                <DeleteIcon onClick={onDeleteClick}>Delete</DeleteIcon>
-                <ModeEditIcon onClick={toggleEditing}>Edit</ModeEditIcon>
-              </>
-            )}
-
-            <TweetText onClick={isOwner && toggleEditing}>
-              {tweetObj.text}
-            </TweetText>
+            {
+              (currentUser.uid ===tweetObj.creatorId && (
+                <>
+                  <DeleteIcon onClick={onDeleteClick}>Delete</DeleteIcon>
+                  <ModeEditIcon onClick={toggleEditing}>Edit</ModeEditIcon>
+                  
+                </>
+              ))
+            }
+            <TweetText >{tweetObj.text}</TweetText>
             {tweetObj.attachmentUrl && (
               <TweetImg
                 src={tweetObj.attachmentUrl}
