@@ -1,20 +1,15 @@
 import { persistStore, persistReducer } from "redux-persist";
-import storage from "redux-persist/lib/storage";
 import { configureStore } from "@reduxjs/toolkit";
+import logger from 'redux-logger';
 import rootReducer from "reducers/index";
 
-const persistConfig = {
-  //reducer의 어느지점에서부터 데이터 저장 할것인지
-  key: "root",
-  //localStorage에 저장
-  storage,
-};
-
-const persistedReducer = persistReducer(persistConfig, rootReducer);
-
+//const middlewares = [logger];
 export const store =
   configureStore({
     reducer: rootReducer,
+    middleware: (getDefaultMiddleware) =>
+getDefaultMiddleware({
+serializableCheck: false
+}),
   });
-
-//export const persistor = persistStore(store);
+export const persistor = persistStore(store);

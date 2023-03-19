@@ -134,7 +134,7 @@ function TweetForm() {
           onChange={onTextChange}
           placeholder="what's on your mind"
           maxLength={100}
-          required
+          
         />
         <FormImgInput
           type="file"

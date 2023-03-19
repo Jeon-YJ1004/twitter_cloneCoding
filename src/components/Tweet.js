@@ -70,7 +70,9 @@ export default function Tweet({ tweetObj }) {
     onSnapshot(doc(dbService, "users", tweetObj.creatorId), (doc) => {
       setCreatorInfo(doc.data());
       //setLoading(true);
+      
     });
+    
   }, [tweetObj]);
   return (
     <PostedTweetContainer>
@@ -107,8 +109,8 @@ export default function Tweet({ tweetObj }) {
               />
           <PostedTweet>
             <WriterInfo>
-              <WriterName>{tweetObj.displayName}</WriterName>
-              <WriterEmail>{tweetObj.email}</WriterEmail>
+              <WriterName>{creatorInfo.displayName}</WriterName>
+              <WriterEmail>{creatorInfo.email}</WriterEmail>
               <WriterCreatedAt>
                 {getDatetoString(tweetObj.createdTime)}
               </WriterCreatedAt>

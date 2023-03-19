@@ -1,41 +1,43 @@
 import React, { useEffect, useRef, useState } from "react";
 import { authService, dbService } from "fbase";
 import { doc, updateDoc } from "firebase/firestore";
+import { useSelector,useDispatch } from "react-redux";
 import Modal from "@mui/material/Modal";
 import styled from "styled-components";
 import PersonIcon from "@mui/icons-material/Person";
 import CloseIcon from "@mui/icons-material/Close";
 import { Alert, Snackbar } from "@mui/material";
-
 import ImageIcon from "@mui/icons-material/Image";
+
 function UpdateProfileForm({
   updateModal,
   updateModalOpen,
   updateModalClose,
-  userObj,
 }) {
-  const [info, setInfo] = useState({
-    displayName: userObj.displayName,
-    email: userObj.email,
-    photoURL: userObj.photoURL,
-    // description: userObj.description,
-  });
+  const dispatch = useDispatch();
+	const currentUser = useSelector((state) => state.user.currentUser);
+	const [info, setInfo] = useState({
+		displayName: currentUser.displayName,
+		email: currentUser.email,
+		photoURL: currentUser.photoURL,
+		//description: currentUser.description,
+	});
   const fileRef = useRef();
   // const bgRef = useRef();
-  const [attachment, setAttachment] = useState(userObj.photoURL);
+  const [attachment, setAttachment] = useState(currentUser.photoURL);
   const textareaRef = useRef();
   const [alert, setAlert] = useState(false);
   useEffect(() => {
     setInfo({
-      displayName: userObj.displayName,
-      email: userObj.email,
-      photoURL: userObj.photoURL,
+      displayName: currentUser.displayName,
+      email: currentUser.email,
+      photoURL: currentUser.photoURL,
     });
-  }, [updateModal, userObj]);
+  }, [updateModal, currentUser]);
 
   useEffect(() => {
-    setAttachment(userObj.photoURL);
-  }, [userObj.photoURL]);
+    setAttachment(currentUser.photoURL);
+  }, [currentUser.photoURL]);
   const onChangeImage = (e) => {
     const file = e.target.files[0];
     const reader = new FileReader();
@@ -51,12 +53,12 @@ function UpdateProfileForm({
     e.preventDefault();
     updateModalClose();
     updateComplete();
-    await updateDoc(doc(dbService, "users", userObj.uid), {
+    await updateDoc(doc(dbService, "users", currentUser.uid), {
       displayName: info.displayName,
       photoURL: attachment === "" ? <PersonIcon /> : attachment,
     });
-    // if (userObj.displayName !== newDisplayName) {
-    //   await userObj.updateProfile({ displayName: newDisplayName });
+    // if (currentUser.displayName !== newDisplayName) {
+    //   await currentUser.updateProfile({ displayName: newDisplayName });
     //   refreshUser();
     // }
   };

@@ -28,6 +28,7 @@ const initialState = {
     bookmark: [],
     retweet: [],
     bgURL: "",
+    createdTime:"",
   },
   mode: "white",
 };

@@ -30,8 +30,6 @@ function LoginForm({ isLoginForm }) {
       .then((result)=>{
           // This is the signed-in user
           user = result.user;
-          console.log(user)
-
           const docRef = doc(dbService, "users", user.uid);
           getDoc(docRef).then(async (snap) => {
             if (snap.exists()) {
@@ -39,8 +37,8 @@ function LoginForm({ isLoginForm }) {
               await dispatch(
                 setCurrentUser({
                   ...snap.data(),
-                  uid: user.uid,
-                  rejweet: user.rejweet ? user.rejweet : [],
+                  // uid: user.uid,
+                  // rejweet: user.rejweet ? user.rejweet : [],
                 })
               );
               sessionStorage.setItem("loginToken", true);
@@ -57,10 +55,12 @@ function LoginForm({ isLoginForm }) {
                   bookmark: [],
                   rejweet: [],
                   bgURL: user.bgURL ? user.bgURL : bgimg,
+                  createdTime:Date.now(),
                 })
               );
               const usersRef = await collection(dbService, "users");
               await setDoc(doc(usersRef, user.uid), {
+                uid: user.uid,
                 photoURL: user.photoURL,
                 email: user.email,
                 displayName:
@@ -71,6 +71,7 @@ function LoginForm({ isLoginForm }) {
                 rejweet: [],
                 description: "",
                 bgURL: user.bgURL ? user.bgURL : bgimg,
+                createdTime:Date.now(),
               });
               sessionStorage.setItem("loginToken", true);
               

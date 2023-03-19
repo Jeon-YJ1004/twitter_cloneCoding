@@ -8,12 +8,11 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { setCurrentUser, setLoginToken } from "reducers/userApi";
 import styled from 'styled-components';
-import Auth from "routes/Auth";
 import Home from "routes/Home";
 import Profile from "routes/Profile";
 import Explore from "routes/Explore";
 import Bookmark from "routes/Bookmark";
-import Tweet from 'routes/Tweet';
+import DetailTweet from 'routes/DetailTweet';
 import SideBar from "components/SideBar";
 
 const AppRouter = () => {
@@ -21,8 +20,9 @@ const AppRouter = () => {
   const loginToken = useSelector((state) => state.user.loginToken);
   const currentUser = useSelector((state) => state.user.currentUser);
   useEffect(() => {
-    let loginToken = sessionStorage.getItem("loginToken");
-    if (loginToken === null || !loginToken) {
+    
+    let loginTokenLocal = sessionStorage.getItem("loginToken");
+    if (loginToken === null || !loginTokenLocal) {
       dispatch(setLoginToken("logout"));
       dispatch(
         setCurrentUser({
@@ -33,6 +33,7 @@ const AppRouter = () => {
           bookmark: [],
           retweet: [],
           bgURL: "",
+          createdTime:"",
         })
       );
       console.log("유저 정보 없음");
@@ -50,13 +51,7 @@ const AppRouter = () => {
           <Route exact path="/">
             <Home />
           </Route>
-          <Route exact path="/profile/:id/tweets">
-            <Profile />
-          </Route>
-          <Route exact path="/profile/:id/likes">
-            <Profile />
-          </Route>
-          <Route exact path="/profile/:id/retweets">
+          <Route exact path="/profile/:uid/:type">
             <Profile />
           </Route>
           <Route exact path="/bookmark">
@@ -66,7 +61,7 @@ const AppRouter = () => {
             <Explore />
           </Route>
           <Route exact path="/tweet/:id">
-            <Tweet/>
+            <DetailTweet/>
           </Route>
        </Switch>:
        <Switch>
@@ -77,7 +72,7 @@ const AppRouter = () => {
             <Explore />
           </Route>
           <Route exact path="/tweet/:id">
-            <Tweet/>
+            <DetailTweet/>
           </Route>
           <Route exact from="*" to="/" />
         </Switch>

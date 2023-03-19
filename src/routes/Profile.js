@@ -8,6 +8,7 @@ import {
   useHistory,
   Link,
   useLocation,
+  useParams,
 } from "react-router-dom";
 import { useSelector } from "react-redux";
 
@@ -19,11 +20,12 @@ import ReTweets from "components/Profile/ReTweets";
 import UpdateProfileForm from "components/form/UpdateProfileForm";
 import EventIcon from "@mui/icons-material/Event";
 
-function Profile({ match }) {
-  const uid = match.params.id;
-  const [loading, setLoading] = useState(false);
+function Profile() {
   const location = useLocation();
+  const params=useParams();
+  const uid=params.uid;
   const history = useHistory();
+  const [loading, setLoading] = useState(false);
   const [userInfo, setUserInfo] = useState({});
 
   const [myTweets, setMyTweets] = useState([]);
@@ -37,19 +39,27 @@ function Profile({ match }) {
   }, []);
 
   const getUserInfo = useCallback(async () => {
+    // await onSnapshot(doc(dbService, "users"),where("uid","==",uid), (doc) => {
+    //   setUserInfo(doc.data());
+    //   setLoading(true);
+    // });
     await onSnapshot(doc(dbService, "users", uid), (doc) => {
-      setUserInfo(doc.data());
-      setLoading(true);
-    });
+			setUserInfo(doc.data());
+			setLoading(true);
+		})
+    console.log(userInfo)
   }, [uid]);
 
-  const getTime = (time) => {
-    const now = parseInt(time);
-    const date = new Date(now);
-    const getFullYear = date.getFullYear();
-    const getMonth = date.getMonth() + 1;
-    const getDate = date.getDate();
-    return `${getFullYear}년 ${getMonth}월 ${getDate}일`;
+  const getDatetoString = (d) => {
+    var date = new Date(d);
+    let str =
+      date.getFullYear() +
+      "년 " +
+      Number(date.getMonth() + 1) +
+      "월 " +
+      date.getDate() +
+      "일 ";
+    return str;
   };
 
   const getMyTweets = useCallback(async () => {
@@ -73,7 +83,7 @@ function Profile({ match }) {
     setUpdateModal(false);
   };
 
-  useEffect(() => {
+  useEffect(() => {  
     getUserInfo();
     getMyTweets();
   }, [getUserInfo, getMyTweets, updateState]);
@@ -107,7 +117,7 @@ function Profile({ match }) {
           <UserInfo>{userInfo.email}</UserInfo>
           <UserInfo>
             <EventIcon />
-            Since {getTime(userInfo.creationTime)}
+            Since {getDatetoString(userInfo.createdTime)}
           </UserInfo>
 
           <UserDesc></UserDesc>

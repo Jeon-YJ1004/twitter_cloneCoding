@@ -38,18 +38,25 @@ function Auth() {
   );
 }
 const AuthFormContainer = styled.div`
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 420px;
-  height: 580px;
-  z-index: 10;
-  background-color: white;
-  border-radius: 20px;
-  z-index: 100;
-  box-shadow: rgba(0, 0, 0, 0.4) 0px 30px 90px;
-  };
+display: flex; 
+position: absolute; 
+top: 50%; 
+left: 50%; 
+padding: 2rem; 
+background-color: #ffffff; 
+transform-origin: center; 
+--transform-translate-x: -50%; 
+--transform-translate-y: -50%; 
+flex-direction: column; 
+justify-content: flex-start; 
+align-items: flex-start; 
+width: 24rem; 
+height: auto; 
+border-radius: 1rem; 
+border-width: 1px; 
+border-color: #ffffff; 
+outline: 0; 
+
 `;
 const ChangeFormContainer = styled.div``;
 const ChangeFormBtn = styled.button`

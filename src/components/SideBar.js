@@ -40,7 +40,7 @@ function SideBar({ userObj }) {
         </StyledLink>
         </Menu>
         <Menu>
-        <StyledLink to="/bookmark">
+        <StyledLink to={{pathname:`/bookmark`, state:{data:"data"}}}>
           <MenuIcon>
             <BookmarkIcon />
           </MenuIcon>
@@ -50,12 +50,12 @@ function SideBar({ userObj }) {
         <Menu>
           {currentUser.uid ?
           <>
-          <StyledLink to={`/profile/${currentUser.uid}/tweets`}>
-          <MenuIcon>
-            <AccountBoxIcon />
-          </MenuIcon>
-          <MenuText>프로필</MenuText>
-        </StyledLink>
+            <StyledLink to={{pathname:`/profile/${currentUser.uid}/tweets`}}>
+            <MenuIcon>
+              <AccountBoxIcon />
+            </MenuIcon>
+            <MenuText>프로필</MenuText>
+          </StyledLink>
           </> :
           <StyledLink onClick={onClickProfile} to="/">
           <MenuIcon>

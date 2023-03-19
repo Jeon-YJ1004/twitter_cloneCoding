@@ -26,10 +26,6 @@ function Home() {
         setLoading(true);
       });
       console.log('useEffect 호출됨.');
-
-      return () => {
-        console.log('useEffect unmount 호출됨.');
-      };
   }, []);
   useEffect(() => {
 		return () => setLoading(false); 

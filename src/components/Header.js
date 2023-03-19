@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   useHistory,
 } from "react-router-dom";
@@ -7,6 +7,8 @@ import { setCurrentUser, setLoginToken } from "reducers/userApi";
 import { authService } from "fbase";
 import PersonIcon from "@mui/icons-material/Person";
 import styled from 'styled-components';
+import Modal from "@mui/material/Modal";
+import Auth from 'routes/Auth';
 function Header(props) {
   const locationName=props.locationName;
   const history = useHistory();
@@ -15,6 +17,16 @@ function Header(props) {
   const loginToken = useSelector((state) => state.user.loginToken);
   const currentUser = useSelector((state) => state.user.currentUser);
 
+  //login modal
+  
+	const [logInOpen, setLogInOpen] = useState(false);
+	const handleLogInOpen = () => setLogInOpen(true);
+	const handleLogInClose = () => setLogInOpen(false);
+
+	const [logoutOpen, setLogoutOpen] = useState(false);
+	const handleLogoutOpen = () => setLogoutOpen(true);
+	const handleLogoutClose = () => setLogoutOpen(false);
+  
   const onClickLogOut = () => {
       authService.signOut();
       sessionStorage.setItem("loginToken", false);
@@ -47,13 +59,36 @@ function Header(props) {
           <UserName>
             {currentUser.displayName}
           </UserName>
-          <button onClick={onClickLogOut} >로그아웃</button>
+          <ToggleLoginDiv >
+            <LoginBtn onClick={handleLogoutOpen}>Log Out</LoginBtn>
+            <Modal open={logoutOpen} onClose={handleLogoutClose} aria-labelledby="modal-modal-title"
+  aria-describedby="modal-modal-description">
+            <div>
+              <LoginBtn onClick={onClickLogOut}>
+						Log out
+					</LoginBtn>
+					<LoginBtn onClick={handleLogoutClose}>
+						Cancel
+					</LoginBtn>
+            </div>
+            
+            </Modal>
+        </ToggleLoginDiv>
         </UserInfo>
-      </UserContainer>) : (
-        <button >로그인</button>
+      </UserContainer>
+      ) : (
+        <ToggleLoginDiv >
+          <LoginBtn onClick={handleLogInOpen}>log In</LoginBtn>
+          <Modal open={logInOpen} onClose={handleLogInClose} aria-labelledby="modal-modal-title" aria-describedby="modal-modal-description">
+            <div>
+              <Auth /> 
+            </div>
+            
+          </Modal>
+          
+        </ToggleLoginDiv>
       )}
     </StyledDiv>
-        
     </>
   )
 }
@@ -94,4 +129,41 @@ const UserImg = styled.img`
   height: 46px;
   border-radius: 50%;
 `;
+
+const ToggleLoginDiv =styled.div`
+// display: flex; 
+// position: absolute; 
+// top: 50%; 
+// left: 50%; 
+// padding: 2rem; 
+// background-color: #ffffff; 
+// transform-origin: center; 
+// --transform-translate-x: -50%; 
+// --transform-translate-y: -50%; 
+// flex-direction: column; 
+// justify-content: flex-start; 
+// align-items: flex-start; 
+// width: 24rem; 
+// height: auto; 
+// border-radius: 1rem; 
+// border-width: 1px; 
+// border-color: #ffffff; 
+// outline: 0; 
+`
+const LoginBtn=styled.button`
+display: flex; 
+padding-top: 0.75rem;
+padding-bottom: 0.75rem; 
+margin-bottom: 1rem; 
+background-color: #C4B5FD; 
+color: #ffffff; 
+font-weight: 700; 
+justify-content: center; 
+align-items: center; 
+width: 100%; 
+border:none;
+border-radius: 100px; 
+cursor: pointer; 
+
+`
 export default Header
